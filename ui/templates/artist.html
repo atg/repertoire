@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<h2>{{ artist.name }}</h2>
+
+{% for b in artist.album_set.all|dictsortreversed:"allmusic_rating"|dictsortreversed:"allmusic_pick" %}
+    <p><a href="/artist/{{ artist.slug }}/album/{{ b.slug }}">{{ b.name }}</a> &mdash; {{ b.allmusic_rating }} {% if b.allmusic_pick %}✓{% endif %}</p>
+{% empty %}
+    <p>They don't have any albums yet</p>
+{% endfor %}
+
+<hr>
+
+<p>{{ artist.allmusic_bio|safe }}</p>
+
+{% endblock %}

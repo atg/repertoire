@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+{% for a in artists %}
+    <p><a href="artist/{{ a.slug }}">{{ a.name }}</a> &mdash; {{ a.allmusic_bio|safe|truncatewords_html:20 }}</p>
+    
+{% empty %}
+    <p>You don't have any artists</p>
+{% endfor %}
+<p><form action="artist/add" method="post" accept-charset="utf-8">
+    <label for='name'>Add artist named: </label>
+    <input type="text" name="name" value="Metallica">
+    <input type="submit" value="Add">
+</form></p>
+
+{% endblock %}
