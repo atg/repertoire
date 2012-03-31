@@ -19,6 +19,9 @@ def home(req):
     print Artist.objects.count()
     return tmpl('home.html')
 
+def albums(req):
+    return tmpl('albums.html')
+
 def add_artist(req):
     print req.POST['name']
     a = Artist(name=req.POST['name'])

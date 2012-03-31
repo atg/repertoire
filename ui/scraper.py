@@ -106,7 +106,7 @@ def albums_for_artist(artist, obj):
         rym_artist_page_ctx = rym_artist_page_ctx[0]
         #print rym_artist_page_ctx
         #rym_album_re = r'<tr[^>]+>\s*<td[^>]+>\s*<span[^>]+ title="\d+">(\d+)</span></td>\s*<td[^>]*>(<b>)?<a href="([^">]+)"\s*>([^>]+)</a>\s*(</b>?)\s*</td>.+?<td style="text-align:center;">\s*(\d*)\s*</td>.+?<td  [^>]*>\s*(\d*)\s*</td>.+?(class="abmrat" style="width:(\d+)px;")?.+?(class="abmpop" style="width:(\d+)px;").+?<td><div[^>]*>([\d.]+)</div>'
-        rym_album_re = r'<tr[^>]+>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td>(.*?)</td>.*?<td>(.*?)</td>.*?<td[^>]+>(.*?)</td>'
+        rym_album_re = r'<tr[^>]*>.*?<td[^>]*>(.*?)</td>.*?<td[^>]*>(.*?)</td>.*?<td[^>]*>(.*?)</td>.*?<td[^>]*>(.*?)</td>.*?<td[^>]*>(.*?)</td>.*?<td[^>]*>(.*?)</td>.*?<td[^>]*>(.*?)</td>.*?<td[^>]*>(.*?)</td>'
         occs = re.findall(re.compile(rym_album_re, re.DOTALL), rym_artist_page_ctx)
         for occ in occs:
             # print '======'
@@ -124,8 +124,21 @@ def albums_for_artist(artist, obj):
             # print '- - -'
             # print occ[6]
             
+            year_group = occ[0]
+            name_group = occ[1]
+            label_group = occ[2]
+            numreviews_group = occ[3]
+            numratings_group = occ[4]
+            ratpop_group = occ[5]
+            overall_group = occ[6]
+            #ratebutton_group = occ[7]
+            
+            if not any([ratpop_group, overall_group]) or label_group == '&nbsp;':
+                continue
+            
             namehtml = occ[1]
-            if 'appears on' in namehtml:
+            
+            if 'Appears on' in namehtml:
                 continue
             
             nametxt = unescape(reextract(namehtml, r'>([^><]+)</a>'))

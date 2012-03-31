@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+{% for b in albums.all|dictsortreversed:"allmusic_pick"|dictsortreversed:"combinedscore" %}
+    <p><a href="/artist/{{ b.artist.slug }}/album/{{ b.slug }}">{{ b.name }}</a>
+
+        <!--
+        &mdash; {{ b.allmusic_rating }} {% if b.allmusic_pick %}✓{% endif %}
+        &mdash; rat {{ b.rym_rating }} / pop {{ b.rym_popularity }} / over {{ b.rym_overall }}
+    -->
+        &ndash; {{ b.combinedscore }} {% if b.allmusic_pick %}✓{% endif %}
+    </p>
+{% empty %}
+    <p>You don't have any albums yet</p>
+{% endfor %}
+
+{% endblock %}
