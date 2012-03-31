@@ -2,6 +2,13 @@
 
 {% block body %}
 
+<p><form action="get-artist-data" method="post" accept-charset="utf-8">
+    Get data for artists (may take a while)
+    <input type="submit">
+</form></p>
+
+<hr>
+
 {% for a in artists %}
     <p><a href="artist/{{ a.slug }}">{{ a.name }}</a> &mdash; {{ a.allmusic_bio|safe|truncatewords_html:20 }}</p>
     
@@ -12,6 +19,14 @@
     <label for='name'>Add artist named: </label>
     <input type="text" name="name" value="Metallica">
     <input type="submit" value="Add">
+</form></p>
+
+<hr>
+
+<p><form action="lastfm-import" method="post" accept-charset="utf-8">
+    <label for='name'>Import from last.fm: </label>
+    <input type="text" name="name" placeholder="username">
+    <input type="submit" value="Import">
 </form></p>
 
 {% endblock %}

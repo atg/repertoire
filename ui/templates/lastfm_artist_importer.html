@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<form action="lastfm-import-artists" method="post" accept-charset="utf-8">
+{% for a in artistnames %}
+    <p>
+        <input type="checkbox" name="{{a}}" checked="checked">
+        <label for='{{a}}'>{{a}}</label>
+    </p>
+{% endfor %}
+    <p><input type="submit" value="Add"></p>
+</form>
+
+{% endblock %}

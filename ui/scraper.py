@@ -7,6 +7,20 @@ import datetime
 import time
 import re
 
+def reextract(s, r):
+    a = re.findall(r, s)
+    if not a:
+        return ''
+    return a[0]
+
+import htmllib
+
+def unescape(s):
+    p = htmllib.HTMLParser(None)
+    p.save_bgn()
+    p.feed(s)
+    return p.save_end()
+
 def queue_url(url, should_wait, **args):
     try:
         return ScrapeReq.objects.get(url=url, fulfilled=True).result
@@ -18,13 +32,16 @@ def queue_url(url, should_wait, **args):
     
     if should_wait:
         
-        time.sleep(2)
+        time.sleep(0.5)
         #r.result = urllib2.urlopen(url).read()
         
         opener = urllib2.build_opener()
         opener.addheaders = [('User-agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_3) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1081.2 Safari/536.5')]
-        r.result = opener.open(url).read()
-        
+        try:
+            r.result = opener.open(url).read()
+        except urllib2.HTTPError as e:
+            print 'HTTP ERROR: %s' % e
+            r.result = ''
         
         r.fulfilled = True
         r.requested = datetime.datetime.now()
@@ -89,52 +106,67 @@ def albums_for_artist(artist, obj):
         rym_artist_page_ctx = rym_artist_page_ctx[0]
         #print rym_artist_page_ctx
         #rym_album_re = r'<tr[^>]+>\s*<td[^>]+>\s*<span[^>]+ title="\d+">(\d+)</span></td>\s*<td[^>]*>(<b>)?<a href="([^">]+)"\s*>([^>]+)</a>\s*(</b>?)\s*</td>.+?<td style="text-align:center;">\s*(\d*)\s*</td>.+?<td  [^>]*>\s*(\d*)\s*</td>.+?(class="abmrat" style="width:(\d+)px;")?.+?(class="abmpop" style="width:(\d+)px;").+?<td><div[^>]*>([\d.]+)</div>'
-        rym_album_re = r'<tr[^>]+>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>'
+        rym_album_re = r'<tr[^>]+>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td[^>]+>(.*?)</td>.*?<td>(.*?)</td>.*?<td>(.*?)</td>.*?<td[^>]+>(.*?)</td>'
         occs = re.findall(re.compile(rym_album_re, re.DOTALL), rym_artist_page_ctx)
         for occ in occs:
-            print '======'
-            print occ[0]
-            print '- - -'
-            print occ[1]
-            print '- - -'
-            print occ[2]
-            print '- - -'
-            print occ[3]
-            print '- - -'
-            print occ[4]
-            print '- - -'
-            print occ[5]
-            print '- - -'
-            print occ[6]
+            # print '======'
+            # print occ[0]
+            # print '- - -'
+            # print occ[1]
+            # print '- - -'
+            # print occ[2]
+            # print '- - -'
+            # print occ[3]
+            # print '- - -'
+            # print occ[4]
+            # print '- - -'
+            # print occ[5]
+            # print '- - -'
+            # print occ[6]
             
             namehtml = occ[1]
-            nametxt = reextract(namehtml, r'>([><]+)</a>')
+            if 'appears on' in namehtml:
+                continue
+            
+            nametxt = unescape(reextract(namehtml, r'>([^><]+)</a>'))
+            print slugify(nametxt)
             
             if not nametxt:
                 continue
-            
             try:
                 al = Album.objects.get(slug=slugify(nametxt), artist=obj)
             except Album.DoesNotExist:
-                print albumdata['name']
-                al = Album(name=albumdata['name'], artist=obj)
+                al = Album(name=nametxt, artist=obj)
             
             datehtml = occ[0]
-            datetxt = reextract(datehtml, r'>\d+<')
+            datetxt = reextract(datehtml, r'>(\d+)<')
             if datetxt:
                 al.rym_year = int(datetxt, 10)
             
-            
             # issueshtml = occ[2]
-            reviewshtml = occ[3].replace(',', '')
+            reviewshtml = occ[3].replace(',', '').strip()
             if reviewshtml:
-                al
-            ratingshtml = occ[4].replace(',', '')
+                al.rym_numreviews = int(reviewshtml, 10)
+            
+            ratingshtml = occ[4].replace(',', '').strip()
+            if ratingshtml:
+                al.rym_numratings = int(ratingshtml, 10)
+            
             charthtml = occ[5]
+            if charthtml:
+                rat = reextract(occ[5], r'class="abmrat" style="width:(\d+)px;"')
+                if rat:
+                    al.rym_rating = int(rat, 10)
+                
+                pop = reextract(occ[5], r'class="abmpop" style="width:(\d+)px;"')
+                if pop:
+                    al.rym_popularity = int(pop, 10)
+            
+            overallhtml = reextract(occ[6].strip(), r'>([\d.]+)<')
+            if overallhtml:
+                al.rym_overall = float(overallhtml)
             
             al.save()
-            
-            
             
     
     '''

@@ -7,9 +7,11 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'repertoire.ui.views.home', name='home'),
-
+    url(r'^lastfm-import$', 'repertoire.ui.views.lastfm_import'),
+    url(r'^lastfm-import-artists$', 'repertoire.ui.views.lastfm_import_artists'),
     url(r'^artist/add$', 'repertoire.ui.views.add_artist', name='add_artist'),
     url(r'^artist/([^/]+)$', 'repertoire.ui.views.view_artist'),
+    url(r'^get-artist-data$', 'repertoire.ui.views.get_artist_data'),
     # url(r'^repertoire/', include('repertoire.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

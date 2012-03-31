@@ -4,8 +4,15 @@
 
 <h2>{{ artist.name }}</h2>
 
-{% for b in artist.album_set.all|dictsortreversed:"allmusic_rating"|dictsortreversed:"allmusic_pick" %}
-    <p><a href="/artist/{{ artist.slug }}/album/{{ b.slug }}">{{ b.name }}</a> &mdash; {{ b.allmusic_rating }} {% if b.allmusic_pick %}✓{% endif %}</p>
+{% for b in artist.album_set.all|dictsortreversed:"allmusic_pick"|dictsortreversed:"combinedscore" %}
+    <p><a href="/artist/{{ artist.slug }}/album/{{ b.slug }}">{{ b.name }}</a>
+        
+        <!--
+        &mdash; {{ b.allmusic_rating }} {% if b.allmusic_pick %}✓{% endif %}
+        &mdash; rat {{ b.rym_rating }} / pop {{ b.rym_popularity }} / over {{ b.rym_overall }}
+    -->
+        &ndash; {{ b.combinedscore }} {% if b.allmusic_pick %}✓{% endif %}
+    </p>
 {% empty %}
     <p>They don't have any albums yet</p>
 {% endfor %}
